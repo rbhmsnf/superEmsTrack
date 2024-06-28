@@ -423,7 +423,7 @@ bot.on('text', async (ctx) => {
     const text = ctx.message.text;
     const userIdToCheck = ctx.message.from.id;
     const user = await userDb(ctx.message.from.id);
-    console.log(user[0].mode == "track")
+
     if (text.startsWith("RR") || text.startsWith("LP") || text.startsWith("UA") || text.startsWith("RB") || text.startsWith("EY") || text.startsWith("UT") || text.startsWith("EX")){
     if (user[0].mode == "track") {
         if (await isUserSubscribed(userIdToCheck)) {
