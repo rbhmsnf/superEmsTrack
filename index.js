@@ -302,7 +302,7 @@ function keepAppRunning() {
 
 bot.command(['start', 'help'], async (ctx) => {
     const userIdToCheck = ctx.message.from.id;
- console.log(userIdToCheck)
+
     if (await isUserSubscribed(userIdToCheck)) {
         const welcomeMessage = `
 مرحبًا بك في بوت تتبع الطرود! 📦✨
@@ -423,7 +423,7 @@ bot.on('text', async (ctx) => {
     const text = ctx.message.text;
     const userIdToCheck = ctx.message.from.id;
     const user = await userDb(ctx.message.from.id);
-    console.log(user[0].mode)
+    console.log(user[0].mode == "track")
     if (user[0].mode == "track") {
         if (await isUserSubscribed(userIdToCheck)) {
             console.log('t')
@@ -491,17 +491,30 @@ By ${named}
 
                                         ],
                                     };
+
                                     if (user[0].translateok == "ar") {
                                         const translate = import("translate").then(module => {
                                             const translate = module.default;
 
                                             translate(send, { to: "ar" }).then(text => {
                                                 bar = 'https://barcodeapi.org/api/' + newString;
-                                                ctx.replyWithPhoto({ url: bar }).then(() => {
-                                                    ctx.sendMessage(text, { reply_markup: replyMarkup }).then(() => {
-                                                        ctx.deleteMessage(messages.message_id)
+                                                try {
+                                                    ctx.replyWithPhoto({ url: bar }).then(() => {
+
+                                                        ctx.sendMessage(text, { reply_markup: replyMarkup }).then(() => {
+                                                            ctx.deleteMessage(messages.message_id)
+                                                        })
                                                     })
-                                                })
+                                                } catch (e) {
+                                                    try {
+                                                        ctx.sendMessage("خطأ سيتم معالجته قريبا")
+                                                    } catch (e) {
+                                                        console.log("errors")
+                                                    }
+
+
+                                                }
+
 
                                             });
                                         }).catch(err => {
@@ -510,22 +523,44 @@ By ${named}
 
                                     } else if (user[0].translateok == "en") {
                                         bar = 'https://barcodeapi.org/api/' + newString;
+                                        try{
                                         ctx.replyWithPhoto({ url: bar }).then(() => {
                                             ctx.sendMessage(send, { reply_markup: replyMarkup }).then(() => {
                                                 ctx.deleteMessage(messages.message_id)
                                             })
                                         })
+                                        } catch (e) {
+                                            try {
+                                                ctx.sendMessage("خطأ سيتم معالجته قريبا")
+                                            } catch (e) {
+                                                console.log("errors")
+                                            }
+
+
+                                        }
+
                                     } else if (user[0].translateok == "fr") {
                                         const translate = import("translate").then(module => {
                                             const translate = module.default;
 
                                             translate(send, { to: "fr" }).then(text => {
                                                 bar = 'https://barcodeapi.org/api/' + newString;
+                                                try{
                                                 ctx.replyWithPhoto({ url: bar }).then(() => {
                                                     ctx.sendMessage(text, { reply_markup: replyMarkup }).then(() => {
                                                         ctx.deleteMessage(messages.message_id)
                                                     })
                                                 })
+                                                } catch (e) {
+                                                    try {
+                                                        ctx.sendMessage("خطأ سيتم معالجته قريبا")
+                                                    } catch (e) {
+                                                        console.log("errors")
+                                                    }
+
+
+                                                }
+
 
                                             });
                                         }).catch(err => {
@@ -537,11 +572,21 @@ By ${named}
 
                                             translate(send, { to: "ar" }).then(text => {
                                                 bar = 'https://barcodeapi.org/api/' + newString;
+                                                try{
                                                 ctx.replyWithPhoto({ url: bar }).then(() => {
                                                     ctx.sendMessage(text, { reply_markup: replyMarkup }).then(() => {
                                                         ctx.deleteMessage(messages.message_id)
                                                     })
                                                 })
+                                                } catch (e) {
+                                                    try {
+                                                        ctx.sendMessage("خطأ سيتم معالجته قريبا")
+                                                    } catch (e) {
+                                                        console.log("errors")
+                                                    }
+
+
+                                                }
 
                                             });
                                         }).catch(err => {
