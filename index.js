@@ -303,7 +303,6 @@ function keepAppRunning() {
 bot.command(['start', 'help'], async (ctx) => {
     const userIdToCheck = ctx.message.from.id;
 
-    if (await isUserSubscribed(userIdToCheck)) {
         const welcomeMessage = `
 مرحبًا بك في بوت تتبع الطرود! 📦✨
 
@@ -327,14 +326,7 @@ bot.command(['start', 'help'], async (ctx) => {
             console.error('Error accessing or creating user:', error);
             ctx.reply('حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى لاحقًا.');
         }
-    } else {
-        const replyMarkup2 = {
-            inline_keyboard: [
-                [{ text: 'اشتراك', url: Channel }],
-            ],
-        };
-        ctx.reply('أنت غير مشترك في القناة.', { reply_markup: replyMarkup2 });
-    }
+  
 });
 
 
