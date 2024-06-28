@@ -424,6 +424,7 @@ bot.on('text', async (ctx) => {
     const userIdToCheck = ctx.message.from.id;
     const user = await userDb(ctx.message.from.id);
     console.log(user[0].mode == "track")
+    if (text.startsWith("RR") && text.startsWith("LP") && text.startsWith("UA") && text.startsWith("RB") && text.startsWith("EY") && text.startsWith("UT") && text.startsWith("EX")){
     if (user[0].mode == "track") {
         if (await isUserSubscribed(userIdToCheck)) {
             console.log('t')
@@ -652,6 +653,9 @@ By ${named}
             ctx.reply('اولا عليك اختيار زر ثم قم بتغيير الاسم او الالغاء')
         }
 
+        }
+    } else {
+        ctx.sendMessage("رمز تتبغ غير صحيح")
     }
 
 
