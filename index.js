@@ -655,7 +655,7 @@ By ${named}
 
         }
     } else {
-        ctx.sendMessage("رمز تتبغ غير صحيح")
+        ctx.sendMessage("رمز تتبع غير صحيح")
     }
 
 
