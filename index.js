@@ -723,7 +723,7 @@ By ${named}
 });
 
 app.listen(3000, () => {
-    bot.telegram.setWebhook(`https://57b6-85-215-169-206.ngrok-free.app/bot`)
+    bot.telegram.setWebhook(`${process.env.RENDER_EXTERNAL_URL}/bot`)
         .then(() => {
             console.log('Webhook Set ✅ & Server is running on port 3000 💻');
             keepAppRunning();
