@@ -302,7 +302,7 @@ function keepAppRunning() {
 
 bot.command(['start', 'help'], async (ctx) => {
     const userIdToCheck = ctx.message.from.id;
-
+ console.log(userIdToCheck)
     if (await isUserSubscribed(userIdToCheck)) {
         const welcomeMessage = `
 مرحبًا بك في بوت تتبع الطرود! 📦✨
@@ -423,7 +423,7 @@ bot.on('text', async (ctx) => {
     const text = ctx.message.text;
     const userIdToCheck = ctx.message.from.id;
     const user = await userDb(ctx.message.from.id);
-    console.log(user[0].mode == "track")
+    console.log(user[0].mode)
     if (user[0].mode == "track") {
         if (await isUserSubscribed(userIdToCheck)) {
             console.log('t')
