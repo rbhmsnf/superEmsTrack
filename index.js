@@ -300,9 +300,9 @@ function keepAppRunning() {
     }, 5 * 60 * 1000);
 }
 
-
 bot.command(['start', 'help'], async (ctx) => {
     const userIdToCheck = ctx.message.from.id;
+
     if (await isUserSubscribed(userIdToCheck)) {
         const welcomeMessage = `
 مرحبًا بك في بوت تتبع الطرود! 📦✨
@@ -312,27 +312,28 @@ bot.command(['start', 'help'], async (ctx) => {
 معنا، لن تفقد طردًا مرة أخرى! لا تتردد في طرح أي استفسارات أو مساعدة أخرى.
 
 بانتظار خدمتك، 🤖📦
-    `;
-        const user = await userDb(ctx.message.from.id);
+        `;
 
-        if (user[0]) { // kayen
-            await ctx.reply(welcomeMessage, markup_admin);
-        } else {
-            await createUser({ id: ctx.message.from.id, mode: "track", track: [] })
-                .then(async (data, error) => {
-                    await ctx.reply(welcomeMessage, markup_admin);
-                });
+        try {
+            const user = await userDb(ctx.message.from.id);
 
-
+            if (user && user.length > 0) { // المستخدم موجود
+                await ctx.reply(welcomeMessage, markup_admin);
+            } else {
+                await createUser({ id: ctx.message.from.id, mode: "track", track: [] });
+                await ctx.reply(welcomeMessage, markup_admin);
+            }
+        } catch (error) {
+            console.error('Error accessing or creating user:', error);
+            ctx.reply('حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى لاحقًا.');
         }
-
     } else {
         const replyMarkup2 = {
             inline_keyboard: [
                 [{ text: 'اشتراك', url: Channel }],
             ],
         };
-        ctx.reply(' اأنت غير مشترك في القناة.', { reply_markup: replyMarkup2 });
+        ctx.reply('أنت غير مشترك في القناة.', { reply_markup: replyMarkup2 });
     }
 });
 
@@ -422,6 +423,7 @@ bot.on('text', async (ctx) => {
     const text = ctx.message.text;
     const userIdToCheck = ctx.message.from.id;
     const user = await userDb(ctx.message.from.id);
+    console.log(user[0].mode == "track")
     if (user[0].mode == "track") {
         if (await isUserSubscribed(userIdToCheck)) {
             console.log('t')
