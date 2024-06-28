@@ -303,6 +303,7 @@ function keepAppRunning() {
 bot.command(['start', 'help'], async (ctx) => {
     const userIdToCheck = ctx.message.from.id;
 
+    if (await isUserSubscribed(userIdToCheck)) {
         const welcomeMessage = `
 مرحبًا بك في بوت تتبع الطرود! 📦✨
 
@@ -326,7 +327,14 @@ bot.command(['start', 'help'], async (ctx) => {
             console.error('Error accessing or creating user:', error);
             ctx.reply('حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى لاحقًا.');
         }
-  
+    } else {
+        const replyMarkup2 = {
+            inline_keyboard: [
+                [{ text: 'اشتراك', url: Channel }],
+            ],
+        };
+        ctx.reply('أنت غير مشترك في القناة.', { reply_markup: replyMarkup2 });
+    }
 });
 
 
@@ -415,7 +423,7 @@ bot.on('text', async (ctx) => {
     const text = ctx.message.text;
     const userIdToCheck = ctx.message.from.id;
     const user = await userDb(ctx.message.from.id);
-
+    console.log(user && user.length > 0 == "track")
     if (text.startsWith("RR") || text.startsWith("LP") || text.startsWith("UA") || text.startsWith("RB") || text.startsWith("EY") || text.startsWith("UT") || text.startsWith("EX")){
     if (user[0].mode == "track") {
         if (await isUserSubscribed(userIdToCheck)) {
@@ -647,7 +655,7 @@ By ${named}
 
         }
     } else {
-        ctx.sendMessage("رمز تتبع غير صحيح")
+        ctx.sendMessage("رمز تتبغ غير صحيح")
     }
 
 
