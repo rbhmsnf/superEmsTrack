@@ -40,6 +40,7 @@ async function createUser(user) {
         .insert([user]);
 
     if (error) {
+
         throw new Error('Error creating user : ', error);
     } else {
         return data
@@ -118,16 +119,36 @@ bot.hears('طرودي', async (ctx) => {
     const keyboard = [
         ['العودة للصفحة الرئسية']
     ];
-    for (let i = 0; i < user[0].track.length; i += buttonsPerRow) {
-        keyboard.push(user[0].track.slice(i, i + buttonsPerRow));
-    }
-    const markup_track = {
-        reply_markup: {
-            keyboard: keyboard,
-            resize_keyboard: true
+    if(user[0]){
+        for (let i = 0; i < user[0].track.length; i += buttonsPerRow) {
+            keyboard.push(user[0].track.slice(i, i + buttonsPerRow));
         }
-    };
-    ctx.reply("قائمة الطرود", markup_track);
+        const markup_track = {
+            reply_markup: {
+                keyboard: keyboard,
+                resize_keyboard: true
+            }
+        };
+        ctx.reply("قائمة الطرود", markup_track);
+    }else{
+        await createUser({ id: ctx.message.from.id, mode: "track", track: [] }).then(async()=>{      
+            if (Array.isArray(user) && user.length > 0 && user[0].track && Array.isArray(user[0].track)) {
+                for (let i = 0; i < user[0].track.length; i += buttonsPerRow) {
+                    keyboard.push(user[0].track.slice(i, i + buttonsPerRow));
+                }
+            } else {
+                console.error("The user array, user[0], or user[0].track is not defined or not an array.");
+            }
+            
+        const markup_track = {
+            reply_markup: {
+                keyboard: keyboard,
+                resize_keyboard: true
+            }
+        };
+        ctx.reply("قائمة الطرود", markup_track);})
+    }
+
 });
 
 // Handle 'الاحصائيات' command
@@ -145,7 +166,7 @@ bot.hears('ازالة طرد', async (ctx) => {
     const user = await userDb(ctx.message.from.id);
     const buttonsPerRow = 1;
     const keyboard = [];
-
+if(user[0]){
     for (i = 0; i < user[0].track.length; i += buttonsPerRow) {
         const row = [];
         for (let j = i; j < i + buttonsPerRow && j < user[0].track.length; j++) {
@@ -159,6 +180,23 @@ bot.hears('ازالة طرد', async (ctx) => {
         inline_keyboard: keyboard,
     };
     await ctx.reply('ازالة طرد', { reply_markup: replyMarkup });
+}else{
+    await createUser({ id: ctx.message.from.id, mode: "track", track: [] }).then(async()=>{    for (i = 0; i < user[0].track.length; i += buttonsPerRow) {
+        const row = [];
+        for (let j = i; j < i + buttonsPerRow && j < user[0].track.length; j++) {
+            row.push({ text: user[0].track[j], callback_data: j.toString() });
+        }
+        keyboard.push(row);
+        console.log(row);
+    }
+
+    const replyMarkup = {
+        inline_keyboard: keyboard,
+    };
+    await ctx.reply('ازالة طرد', { reply_markup: replyMarkup });})
+
+}
+
 });
 
 
@@ -249,8 +287,8 @@ bot.hears('تسمية الطرد', async (ctx) => {
     const user = await userDb(ctx.message.from.id);
     const buttonsPerRow = 1;
     const keyboard = [];
-
-    for (i = 0; i < user[0].track.length; i += buttonsPerRow) {
+if(user[0]){
+       for (i = 0; i < user[0].track.length; i += buttonsPerRow) {
         const row = [];
         for (let j = i; j < i + buttonsPerRow && j < user[0].track.length; j++) {
             row.push({ text: user[0].track[j], callback_data: j.toString() });
@@ -262,7 +300,25 @@ bot.hears('تسمية الطرد', async (ctx) => {
     const replyMarkup = {
         inline_keyboard: keyboard,
     };
-    await ctx.reply('تسمية الطرد', { reply_markup: replyMarkup });
+    await ctx.reply('تسمية الطرد', { reply_markup: replyMarkup }); 
+}else{
+    await createUser({ id: ctx.message.from.id, mode: "track", track: [] }).then(async()=>{
+        for (i = 0; i < user[0].track.length; i += buttonsPerRow) {
+            const row = [];
+            for (let j = i; j < i + buttonsPerRow && j < user[0].track.length; j++) {
+                row.push({ text: user[0].track[j], callback_data: j.toString() });
+            }
+            keyboard.push(row);
+            console.log(row);
+        }
+    
+        const replyMarkup = {
+            inline_keyboard: keyboard,
+        };
+        await ctx.reply('تسمية الطرد', { reply_markup: replyMarkup }); 
+    })
+}
+
 
 });
 
@@ -302,9 +358,7 @@ function keepAppRunning() {
 
 bot.command(['start', 'help'], async (ctx) => {
     const userIdToCheck = ctx.message.from.id;
-
-    if (await isUserSubscribed(userIdToCheck)) {
-        const welcomeMessage = `
+    const welcomeMessage = `
 مرحبًا بك في بوت تتبع الطرود! 📦✨
 
 نحن هنا لمساعدتك في تتبع طرودك بسهولة ويسر. ما عليك سوى إرسال رقم الطرد الخاص بك، وسنقوم بتزويدك بآخر المعلومات حول حالة الشحنة في الحال.
@@ -312,30 +366,32 @@ bot.command(['start', 'help'], async (ctx) => {
 معنا، لن تفقد طردًا مرة أخرى! لا تتردد في طرح أي استفسارات أو مساعدة أخرى.
 
 بانتظار خدمتك، 🤖📦
-        `;
+    `;
 
-        try {
-            const user = await userDb(ctx.message.from.id);
-
-            if (user && user.length > 0) { // المستخدم موجود
+    try {
+        const user = await userDb(ctx.message.from.id);
+        
+        if (user[0]) {
+            if (await isUserSubscribed(userIdToCheck)) {
                 await ctx.reply(welcomeMessage, markup_admin);
             } else {
-                await createUser({ id: ctx.message.from.id, mode: "track", track: [] });
-                await ctx.reply(welcomeMessage, markup_admin);
+                const replyMarkup2 = {
+                    inline_keyboard: [
+                        [{ text: 'اشتراك', url: Channel }],
+                    ],
+                };
+                ctx.reply('أنت غير مشترك في القناة.', { reply_markup: replyMarkup2 });
             }
-        } catch (error) {
-            console.error('Error accessing or creating user:', error);
-            ctx.reply('حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى لاحقًا.');
+        } else {
+            await createUser({ id: ctx.message.from.id, mode: "track", track: [] });
+            await ctx.reply(welcomeMessage, markup_admin);
         }
-    } else {
-        const replyMarkup2 = {
-            inline_keyboard: [
-                [{ text: 'اشتراك', url: Channel }],
-            ],
-        };
-        ctx.reply('أنت غير مشترك في القناة.', { reply_markup: replyMarkup2 });
+    } catch (error) {
+        console.error('Error accessing or creating user:', error);
+        ctx.reply('حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى لاحقًا.');
     }
 });
+
 
 
 async function track_cainio(message) {
@@ -392,6 +448,7 @@ async function track(message) {
 
 async function Ems(tracks) {
     try {
+      //  const url =`https://www.ems.post/en/global-network/tracking?itemId==${tracks}&language=EN`
         const url = `https://ems.dz/track/index.php?icd=${tracks}`;
         const response = await axios.get(url);
         const htmlContent = response.data;
@@ -423,10 +480,11 @@ bot.on('text', async (ctx) => {
     const text = ctx.message.text;
     const userIdToCheck = ctx.message.from.id;
     const user = await userDb(ctx.message.from.id);
-    console.log(user && user.length > 0 == "track")
+     if(user[0]){
     if (text.startsWith("RR") || text.startsWith("LP") || text.startsWith("UA") || text.startsWith("RB") || text.startsWith("EY") || text.startsWith("UT") || text.startsWith("EX")){
-    if (user[0].mode == "track") {
-        if (await isUserSubscribed(userIdToCheck)) {
+  
+        if (user[0].mode == "track") {
+        if (await isUserSubscribed(userIdToCheck)) { 
             console.log('t')
             try {
                 if (text === "/start") {
@@ -658,11 +716,14 @@ By ${named}
         ctx.sendMessage("رمز تتبغ غير صحيح")
     }
 
-
+    }else{
+        await createUser({ id: ctx.message.from.id, mode: "track", track: [] });
+        await ctx.reply("قم بارسال الرمز مرة اخرى");
+    }
 });
 
 app.listen(3000, () => {
-    bot.telegram.setWebhook(`${process.env.RENDER_EXTERNAL_URL}/bot`)
+    bot.telegram.setWebhook(`https://57b6-85-215-169-206.ngrok-free.app/bot`)
         .then(() => {
             console.log('Webhook Set ✅ & Server is running on port 3000 💻');
             keepAppRunning();
